@@ -12,9 +12,6 @@
     You should have received a copy of the GNU General Public License
     along with Deviation.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-//https://github.com/rgwan/st7565
-
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
@@ -32,55 +29,17 @@
 #endif
 
 static void LCD_Cmd(unsigned cmd) {
-    /*CMD_MODE();
+    CMD_MODE();
     CS_LO();
     spi_xfer(LCD_SPI.spi, cmd);
-    CS_HI();*/
-
-    unsigned char Num;
-    gpio_clear(GPIO_CS);
-    NOP();
-    gpio_clear(GPIO_RS);
-    NOP();
-    for(Num=0;Num<8;Num++)
-    {
-    if((Command&0x80) == 0) gpio_clear(GPIO_SDI);
-    else gpio_set(GPIO_SDI);
-    NOP();
-    Command = Command << 1;
-    gpio_clear(GPIO_SCLK);
-    NOP();
-    gpio_set(GPIO_SCLK);
-    NOP();
-    }
-    NOP();
-    gpio_set(GPIO_CS);
+    CS_HI();
 }
 
 static void LCD_Data(unsigned cmd) {
-    /*DATA_MODE();
+    DATA_MODE();
     CS_LO();
     spi_xfer(LCD_SPI.spi, cmd);
-    CS_HI();*/
-
-    unsigned char Num;
-    gpio_clear(GPIO_CS);
-    NOP();
-    gpio_set(GPIO_RS);
-    NOP();
-    for(Num=0;Num<8;Num++)
-    {
-    if((Dat&0x80) == 0) gpio_clear(GPIO_SDI);
-    else gpio_set(GPIO_SDI);
-    NOP();
-    Dat = Dat << 1;
-    gpio_clear(GPIO_SCLK);
-    NOP();
-    gpio_set(GPIO_SCLK);
-    NOP();
-    }
-    NOP();
-    gpio_set(GPIO_CS);
+    CS_HI();
 }
 
 static void lcd_init_ports()
@@ -91,25 +50,8 @@ static void lcd_init_ports()
     rcc_periph_clock_enable(get_rcc_from_pin(LCD_SPI_MODE));
     GPIO_setup_output(LCD_SPI.csn, OTYPE_PUSHPULL);
     GPIO_setup_output(LCD_SPI_MODE, OTYPE_PUSHPULL);
-
-    //SET SPI BAUDRATE
-    spi_set_baudrate_prescaler(LCD_SPI.spi, OLED_SPI_RATE);
+    if (HAS_OLED_DISPLAY)
+        spi_set_baudrate_prescaler(LCD_SPI.spi, OLED_SPI_RATE);
 }
-
-static void Display_fill(unsigned char fill)
-{
- unsigned char page,column;
- for(page=0xB7;page>=0xB0;page--)
-    {
-     w_cmd(page);  //set page address
-     w_cmd(0x10);  //set Column address MSB
-     w_cmd(0x00);  //set column address LSB
-     for(column=0;column<131;column++)
-        {
-         w_dat(fill);
-        }
-    }
-}
-
 
 #include "128x64x1_common.h"

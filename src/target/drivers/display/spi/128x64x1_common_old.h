@@ -1,3 +1,18 @@
+/*
+    This project is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Deviation is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Deviation.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 #ifndef HAS_LCD_FLIPPED
     #define HAS_LCD_FLIPPED 0
 #endif
@@ -5,7 +20,8 @@
     #define HAS_LCD_SWAPPED_PAGES 0
 #endif
 
-#include "128x64x1_ST7565.h"
+#include "128x64x1_nt7538.h"
+#include "128x64x1_oled_ssd1306.h"
 
 //The screen is 129 characters, but we'll only expoise 128 of them
 #define PHY_LCD_WIDTH 129
@@ -19,18 +35,6 @@ static s8 dir;
 void lcd_display(uint8_t on)
 {
     LCD_Cmd(0xAE | (on ? 1 : 0));
-
-    unsigned char page,column;
- for(page=0xB0;page<=0xB7;page++)
-    {
-     w_cmd(page);  //set page address
-     w_cmd(0x10);  //set Column address MSB
-     w_cmd(0x00);  //set column address LSB
-     for(column=0;column<128;column++)
-        {
-         w_dat(*p++);
-        }
-    }
 }
 
 void lcd_set_page_address(uint8_t page)
@@ -46,7 +50,7 @@ void lcd_set_column_address(uint8_t column)
 
 void lcd_set_start_line(int line)
 {
-  LCD_Cmd((line & 0x3F) | 0x40);
+  LCD_Cmd((line & 0x3F) | 0x40); 
 }
 
 void LCD_Contrast(unsigned contrast)
@@ -63,12 +67,14 @@ void LCD_Contrast(unsigned contrast)
 
 void LCD_Init()
 {
-    /*lcd_init_ports();
-
-    _lcd_reset();
-
-    _lcd_init();
-
+    lcd_init_ports();
+    if (HAS_OLED_DISPLAY) {
+        _oled_reset();
+        _oled_init();
+    } else {
+        _lcd_reset();
+        _lcd_init();
+    }
     volatile int i = 0x8000;
     while(i) i--;
     lcd_display(0);     // Display Off
@@ -84,33 +90,7 @@ void LCD_Init()
     lcd_display(1);
     LCD_Contrast(5);
     memset(img, 0, sizeof(img));
-    memset(dirty, 0, sizeof(dirty));*/
-
-
-    gpio_clear(GPIO_CS);
-    LCD_Reset();
-    w_cmd(0xA3);    //LCD Bias	 selection(1/65 Duty,1/7Bias)
-    w_cmd(0xA0);    //ADC selection(SEG0->SEG128)
-    w_cmd(0xC8);    //SHL selection(COM0->COM64)
-
-    w_cmd(0x26);    //Regulator Resistor Selection
-    delay_ms(5);
-    w_cmd(0x81);    //Electronic Volume
-    w_cmd(0x20);    //Reference Register selection  Vo=(1+Rb/Ra)(1+a)*2.1=10
-    w_cmd(VC_ON);    //Power Control(Vc=1;Vr=0;Vf=0)
-    delay_ms(10);
-    w_cmd(VC_ON|VR_ON);
-    delay_ms(10);
-    w_cmd(VC_ON|VR_ON|VF_ON);
-    delay_ms(10);
-    w_cmd(0xF8);
-    w_cmd(0x01);
-
-    delay_ms(5);
-    w_cmd(0xAF);    //Display on
-    w_cmd(0xA6);
-
-
+    memset(dirty, 0, sizeof(dirty));
 }
 
 void LCD_Clear(unsigned int val)
