@@ -23,12 +23,12 @@ void lcd_display(uint8_t on)
     unsigned char page,column;
  for(page=0xB0;page<=0xB7;page++)
     {
-     w_cmd(page);  //set page address
-     w_cmd(0x10);  //set Column address MSB
-     w_cmd(0x00);  //set column address LSB
+     LCD_Cmd(page);  //set page address
+     LCD_Cmd(0x10);  //set Column address MSB
+     LCD_Cmd(0x00);  //set column address LSB
      for(column=0;column<128;column++)
         {
-         w_dat(*p++);
+         LCD_Data(*p++);
         }
     }
 }
@@ -89,26 +89,26 @@ void LCD_Init()
 
     gpio_clear(GPIO_CS);
     LCD_Reset();
-    w_cmd(0xA3);    //LCD Bias	 selection(1/65 Duty,1/7Bias)
-    w_cmd(0xA0);    //ADC selection(SEG0->SEG128)
-    w_cmd(0xC8);    //SHL selection(COM0->COM64)
+    LCD_Cmd(0xA3);    //LCD Bias	 selection(1/65 Duty,1/7Bias)
+    LCD_Cmd(0xA0);    //ADC selection(SEG0->SEG128)
+    LCD_Cmd(0xC8);    //SHL selection(COM0->COM64)
 
-    w_cmd(0x26);    //Regulator Resistor Selection
+    LCD_Cmd(0x26);    //Regulator Resistor Selection
     delay_ms(5);
-    w_cmd(0x81);    //Electronic Volume
-    w_cmd(0x20);    //Reference Register selection  Vo=(1+Rb/Ra)(1+a)*2.1=10
-    w_cmd(VC_ON);    //Power Control(Vc=1;Vr=0;Vf=0)
+    LCD_Cmd(0x81);    //Electronic Volume
+    LCD_Cmd(0x20);    //Reference Register selection  Vo=(1+Rb/Ra)(1+a)*2.1=10
+    LCD_Cmd(VC_ON);    //Power Control(Vc=1;Vr=0;Vf=0)
     delay_ms(10);
-    w_cmd(VC_ON|VR_ON);
+    LCD_Cmd(VC_ON|VR_ON);
     delay_ms(10);
-    w_cmd(VC_ON|VR_ON|VF_ON);
+    LCD_Cmd(VC_ON|VR_ON|VF_ON);
     delay_ms(10);
-    w_cmd(0xF8);
-    w_cmd(0x01);
+    LCD_Cmd(0xF8);
+    LCD_Cmd(0x01);
 
     delay_ms(5);
-    w_cmd(0xAF);    //Display on
-    w_cmd(0xA6);
+    LCD_Cmd(0xAF);    //Display on
+    LCD_Cmd(0xA6);
 
 
 }

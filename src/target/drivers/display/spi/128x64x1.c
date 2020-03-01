@@ -18,6 +18,15 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/spi.h>
+
+#include <libopencm3/stm32/timer.h>
+
+#include <libopencm3/cm3/systick.h>
+#include <libopencm3/cm3/nvic.h>
+#include <libopencm3/cm3/scb.h>
+#include <stdint.h>
+
+
 #include "common.h"
 #include "gui/gui.h"
 #include "target/drivers/mcu/stm32/rcc.h"
@@ -44,10 +53,10 @@ static void LCD_Cmd(unsigned cmd) {
     NOP();
     for(Num=0;Num<8;Num++)
     {
-    if((Command&0x80) == 0) gpio_clear(GPIO_SDI);
+    if((cmd&0x80) == 0) gpio_clear(GPIO_SDI);
     else gpio_set(GPIO_SDI);
     NOP();
-    Command = Command << 1;
+    cmd = cmd << 1;
     gpio_clear(GPIO_SCLK);
     NOP();
     gpio_set(GPIO_SCLK);
@@ -91,6 +100,10 @@ static void lcd_init_ports()
     rcc_periph_clock_enable(get_rcc_from_pin(LCD_SPI_MODE));
     GPIO_setup_output(LCD_SPI.csn, OTYPE_PUSHPULL);
     GPIO_setup_output(LCD_SPI_MODE, OTYPE_PUSHPULL);
+
+    //GPIO
+    gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
+		GPIO_CNF_OUTPUT_PUSHPULL, GPIO3 | GPIO4 |GPIO5 | GPIO6 | GPIO7 | GPIO8| GPIO9);	 
 
     //SET SPI BAUDRATE
     spi_set_baudrate_prescaler(LCD_SPI.spi, OLED_SPI_RATE);

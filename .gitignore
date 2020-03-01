@@ -44,3 +44,4 @@ src/target/common/filesystems/devofs/tests/blib
 src/target/common/filesystems/devofs/tests/pm_to_blib
 src/target/common/filesystems/devofs/tests/Makefile.old
 
+.vscode/c_cpp_properties.json
